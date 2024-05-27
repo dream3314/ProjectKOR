@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController1 : MonoBehaviour
 {
     public Rigidbody2D rb;
     public BoxCollider2D boxCollider2D;
     public Animator animator;
+    public bool Stun = false;
 
-    private float Horizontal;
     private float speed = 5f;
     private float JumpingPower = 16f;
     private bool IsFaceRight = true;
@@ -20,8 +20,7 @@ public class PlayerController : MonoBehaviour
     private float dashDuration = 0.2f; // 대쉬 지속 시간 (초)
     private float dashTimer = 0f;
     private float dashDirection = 1f; // 대쉬 방향
-    public bool Stun = false;
-    private float stunDuration = 1f; // Stun 지속 시간 (초)
+    private float stunDuration = 5f; // Stun 지속 시간 (초)
     private float stunTimer = 0f;
 
     [SerializeField] private Transform GroundTouch;
@@ -41,16 +40,26 @@ public class PlayerController : MonoBehaviour
     {
         if (!Stun)
         {
-            Horizontal = Input.GetAxisRaw("Horizontal");
+            float Horizontal = 0f;
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                Horizontal = -1f;
+            }
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                Horizontal = 1f;
+            }
 
             animator.SetFloat("Run", Mathf.Abs(Horizontal));
             animator.SetBool("Jump", !IsGround());
 
-            if (Input.GetButtonDown("Jump") && IsGround())
+            // X 키를 눌렀을 때 점프
+            if (Input.GetKeyDown(KeyCode.X) && IsGround())
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpingPower);
             }
-            if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+            if (Input.GetKeyUp(KeyCode.X) && rb.velocity.y > 0f)
             {
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
             }
@@ -58,10 +67,9 @@ public class PlayerController : MonoBehaviour
             // 대쉬 입력 감지
             if (Input.GetKeyDown(KeyCode.Z) && Horizontal != 0f)
             {
-                StartDash();
+                StartDash(Horizontal);
             }
-
-            Flip();
+            Flip(Horizontal);
         }
 
         // Stun 상태 시간 경과 체크
@@ -92,6 +100,17 @@ public class PlayerController : MonoBehaviour
         }
         else if (!Stun)
         {
+            float Horizontal = 0f;
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                Horizontal = -1f;
+            }
+            else if (Input.GetKey(KeyCode.RightArrow))
+            {
+                Horizontal = 1f;
+            }
+
             rb.velocity = new Vector2(Horizontal * speed, rb.velocity.y);
 
             // 화면을 벗어나면 반대편으로 이동
@@ -111,7 +130,7 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(GroundTouch.position, 0.2f, GroundLayer);
     }
 
-    private void Flip()
+    private void Flip(float Horizontal)
     {
         if (IsFaceRight && Horizontal < 0f || !IsFaceRight && Horizontal > 0f)
         {
@@ -122,7 +141,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void StartDash()
+    private void StartDash(float Horizontal)
     {
         isDashing = true;
         dashTimer = dashDuration;
@@ -135,5 +154,11 @@ public class PlayerController : MonoBehaviour
         Stun = true;
         stunTimer = duration;
         rb.velocity = Vector2.zero; // 스턴 상태일 때 움직임 멈춤
+    }
+
+    // 기본 Stun 지속 시간을 사용하는 메서드 추가
+    public void StunPlayer()
+    {
+        StunPlayer(stunDuration);
     }
 }

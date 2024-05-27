@@ -49,7 +49,7 @@ public class SwordController : MonoBehaviour
 
     void Update()
     {
-        if (isTouchingSword && currentPlayer != null && Input.GetKeyDown(KeyCode.DownArrow) && !isZooming) // 플레이어가 Sword와 닿아 있고, 아래 방향키를 눌렀을 때
+        if (isTouchingSword && currentPlayer != null && (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.Keypad5)) && !isZooming) // 플레이어가 Sword와 닿아 있고, 아래 방향키 또는 키패드 5키를 눌렀을 때
         {
             Debug.Log("Now you can pull out sword!!");
             transform.Translate(Vector2.up * pullSpeed);
@@ -65,7 +65,7 @@ public class SwordController : MonoBehaviour
             }
         }
 
-        if (isZoomedIn && currentPlayer != null && Input.GetKeyDown(KeyCode.UpArrow) && !isZooming) // 플레이어가 Sword와 닿아 있는 상태에서 위 방향키를 눌렀을 때
+        if (isZoomedIn && currentPlayer != null && (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.Keypad8)) && !isZooming) // 플레이어가 Sword와 닿아 있는 상태에서 위 방향키 또는 키패드 8키를 눌렀을 때
         {
             Debug.Log("Zoom out and free the player!");
             StartCoroutine(ZoomCamera(zoomOutSize, originalCameraPosition, zoomSpeed)); // 원래 위치로 카메라 이동

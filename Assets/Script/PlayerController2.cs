@@ -6,8 +6,9 @@ public class PlayerController2 : MonoBehaviour
 {
     public Rigidbody2D rb;
     public BoxCollider2D boxCollider2D;
+    public Animator animator;
+    public bool Stun = false;
 
-    private float Horizontal;
     private float speed = 5f;
     private float JumpingPower = 16f;
     private bool IsFaceRight = true;
@@ -19,8 +20,7 @@ public class PlayerController2 : MonoBehaviour
     private float dashDuration = 0.2f; // 대쉬 지속 시간 (초)
     private float dashTimer = 0f;
     private float dashDirection = 1f; // 대쉬 방향
-    public bool Stun = false;
-    private float stunDuration = 1f; // Stun 지속 시간 (초)
+    private float stunDuration = 5f; // Stun 지속 시간 (초)
     private float stunTimer = 0f;
 
     [SerializeField] private Transform GroundTouch;
@@ -30,6 +30,7 @@ public class PlayerController2 : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider2D = GetComponent<BoxCollider2D>();
+        animator = GetComponent<Animator>();
         mainCamera = Camera.main;
         screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, mainCamera.transform.position.z));
         objectWidth = GetComponent<SpriteRenderer>().bounds.extents.x;
@@ -39,24 +40,36 @@ public class PlayerController2 : MonoBehaviour
     {
         if (!Stun)
         {
-            Horizontal = Input.GetAxisRaw("Horizontal");
+            float Horizontal = 0f;
 
-            if (Input.GetButtonDown("Jump") && IsGround())
+            if (Input.GetKey(KeyCode.Keypad4))
+            {
+                Horizontal = -1f;
+            }
+            else if (Input.GetKey(KeyCode.Keypad6))
+            {
+                Horizontal = 1f;
+            }
+
+            animator.SetFloat("Run", Mathf.Abs(Horizontal));
+            animator.SetBool("Jump", !IsGround());
+
+            // 점프 입력 감지
+            if (Input.GetKeyDown(KeyCode.P) && IsGround())
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpingPower);
             }
-            if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+            if (Input.GetKeyUp(KeyCode.P) && rb.velocity.y > 0f)
             {
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
             }
 
             // 대쉬 입력 감지
-            if (Input.GetKeyDown(KeyCode.Z) && Horizontal != 0f)
+            if (Input.GetKeyDown(KeyCode.O) && Horizontal != 0f)
             {
-                StartDash();
+                StartDash(Horizontal);
             }
-
-            Flip();
+            Flip(Horizontal);
         }
 
         // Stun 상태 시간 경과 체크
@@ -87,6 +100,17 @@ public class PlayerController2 : MonoBehaviour
         }
         else if (!Stun)
         {
+            float Horizontal = 0f;
+
+            if (Input.GetKey(KeyCode.Keypad4))
+            {
+                Horizontal = -1f;
+            }
+            else if (Input.GetKey(KeyCode.Keypad6))
+            {
+                Horizontal = 1f;
+            }
+
             rb.velocity = new Vector2(Horizontal * speed, rb.velocity.y);
 
             // 화면을 벗어나면 반대편으로 이동
@@ -106,7 +130,7 @@ public class PlayerController2 : MonoBehaviour
         return Physics2D.OverlapCircle(GroundTouch.position, 0.2f, GroundLayer);
     }
 
-    private void Flip()
+    private void Flip(float Horizontal)
     {
         if (IsFaceRight && Horizontal < 0f || !IsFaceRight && Horizontal > 0f)
         {
@@ -117,7 +141,7 @@ public class PlayerController2 : MonoBehaviour
         }
     }
 
-    private void StartDash()
+    private void StartDash(float Horizontal)
     {
         isDashing = true;
         dashTimer = dashDuration;
@@ -125,11 +149,16 @@ public class PlayerController2 : MonoBehaviour
         speed = dashSpeed; // 대쉬 속도 적용
     }
 
-    // Stun 상태로 전환하는 메서드
     public void StunPlayer(float duration)
     {
         Stun = true;
         stunTimer = duration;
         rb.velocity = Vector2.zero; // 스턴 상태일 때 움직임 멈춤
+    }
+
+    // 기본 Stun 지속 시간을 사용하는 메서드 추가
+    public void StunPlayer()
+    {
+        StunPlayer(stunDuration);
     }
 }
