@@ -9,22 +9,30 @@ public class PlayerController1 : MonoBehaviour
     public Animator animator;
     public bool Stun = false;
 
-    private float speed = 5f;
-    private float JumpingPower = 16f;
     private bool IsFaceRight = true;
     private Camera mainCamera;
     private Vector2 screenBounds;
     private float objectWidth;
     private bool isDashing = false;
-    private float dashSpeed = 10f;
     private float dashDuration = 0.2f; // 대쉬 지속 시간 (초)
     private float dashTimer = 0f;
     private float dashDirection = 1f; // 대쉬 방향
     private float stunDuration = 5f; // Stun 지속 시간 (초)
     private float stunTimer = 0f;
+    private SwordController swordController;
 
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float JumpingPower = 16f;
+    [SerializeField] private float dashSpeed = 10f;
     [SerializeField] private Transform GroundTouch;
     [SerializeField] private LayerMask GroundLayer;
+
+    // 대시 충전 관련 변수 추가
+    private bool isChargingDash = false;
+    private float dashChargeTime = 0f;
+    private float maxDashChargeTime = 2f;
+    private float[] dashSpeedLevels = { 10f, 20f }; // 단계별 대시 속도
+    private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
 
     void Start()
     {
@@ -34,6 +42,7 @@ public class PlayerController1 : MonoBehaviour
         mainCamera = Camera.main;
         screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, mainCamera.transform.position.z));
         objectWidth = GetComponent<SpriteRenderer>().bounds.extents.x;
+        swordController = GetComponent<SwordController>();
     }
 
     void Update()
@@ -64,11 +73,24 @@ public class PlayerController1 : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
             }
 
-            // 대쉬 입력 감지
-            if (Input.GetKeyDown(KeyCode.Z) && Horizontal != 0f)
+            // 대시 충전 시작
+            if (Input.GetKeyDown(KeyCode.Z))
             {
-                StartDash(Horizontal);
+                StartDashCharge();
             }
+
+            // 대시 충전 중
+            if (Input.GetKey(KeyCode.Z))
+            {
+                ChargeDash();
+            }
+
+            // 대시 시작
+            if (Input.GetKeyUp(KeyCode.Z))
+            {
+                ExecuteDash();
+            }
+
             Flip(Horizontal);
         }
 
@@ -98,7 +120,7 @@ public class PlayerController1 : MonoBehaviour
                 speed = 5f; // 대쉬가 종료되면 다시 기본 속도로 돌아감
             }
         }
-        else if (!Stun)
+        else if (!Stun && !isChargingDash)
         {
             float Horizontal = 0f;
 
@@ -141,11 +163,43 @@ public class PlayerController1 : MonoBehaviour
         }
     }
 
-    private void StartDash(float Horizontal)
+    private void StartDashCharge()
     {
+        isChargingDash = true;
+        dashChargeTime = 0f;
+    }
+
+    private void ChargeDash()
+    {
+        if (isChargingDash)
+        {
+            dashChargeTime += Time.deltaTime;
+            if (dashChargeTime > maxDashChargeTime)
+            {
+                dashChargeTime = maxDashChargeTime;
+            }
+        }
+    }
+
+    private void ExecuteDash()
+    {
+        isChargingDash = false;
         isDashing = true;
+
+        // 충전된 시간에 따라 대시 속도와 지속 시간 결정
+        if (dashChargeTime < 1f)
+        {
+            dashSpeed = dashSpeedLevels[0];
+            dashDuration = dashDurationLevels[0];
+        }
+        else
+        {
+            dashSpeed = dashSpeedLevels[1];
+            dashDuration = dashDurationLevels[1];
+        }
+
         dashTimer = dashDuration;
-        dashDirection = Horizontal > 0f ? 1f : -1f; // 대쉬 방향 결정
+        dashDirection = IsFaceRight ? 1f : -1f; // 현재 바라보는 방향으로 대쉬
         speed = dashSpeed; // 대쉬 속도 적용
     }
 

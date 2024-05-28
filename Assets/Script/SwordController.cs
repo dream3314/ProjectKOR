@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class SwordController : MonoBehaviour
 {
+    public float zoomInSize = 3f;
+    public float zoomOutSize = 5f;
+    public float zoomSpeed = 0.1f;
+    public Vector3 zoomInOffset = new Vector3(0, 0, -10); // 줌인 시 카메라 위치 오프셋
+
     private bool isTouchingSword = false;
     private float pullSpeed = 0.005f; // 예시로 기본 값을 설정합니다.
     private Rigidbody2D playerRigidbody;
     private Camera mainCamera;
     private bool isZoomedIn = false;
-    public float zoomInSize = 3f;
-    public float zoomOutSize = 5f;
-    public float zoomSpeed = 0.1f;
-    public Vector3 zoomInOffset = new Vector3(0, 0, -10); // 줌인 시 카메라 위치 오프셋
     private Vector3 originalCameraPosition = new Vector3(0, 0, -10); // 카메라의 원래 위치
     private bool isZooming = false; // 줌 상태를 추적하는 변수
     private GameObject currentPlayer;
