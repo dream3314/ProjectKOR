@@ -21,9 +21,9 @@ public class PlayerController1 : MonoBehaviour
     private float stunTimer = 0f;
     private SwordController swordController;
 
+    [SerializeField] private float dashSpeed = 10f;
     [SerializeField] private float speed = 5f;
     [SerializeField] private float JumpingPower = 16f;
-    [SerializeField] private float dashSpeed = 10f;
     [SerializeField] private Transform GroundTouch;
     [SerializeField] private LayerMask GroundLayer;
 
@@ -31,8 +31,9 @@ public class PlayerController1 : MonoBehaviour
     private bool isChargingDash = false;
     private float dashChargeTime = 0f;
     private float maxDashChargeTime = 2f;
-    private float[] dashSpeedLevels = { 10f, 20f }; // 단계별 대시 속도
+    private float[] dashSpeedLevels = { 10f, 15f }; // 단계별 대시 속도
     private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
+    private float chargeMoveSpeed = 2f; // 충전 중 이동 속도
 
     void Start()
     {
@@ -83,6 +84,8 @@ public class PlayerController1 : MonoBehaviour
             if (Input.GetKey(KeyCode.Z))
             {
                 ChargeDash();
+                // 충전 중일 때 플레이어 이동
+                rb.velocity = new Vector2(Horizontal * chargeMoveSpeed, rb.velocity.y);
             }
 
             // 대시 시작
