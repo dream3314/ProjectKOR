@@ -206,6 +206,17 @@ public class PlayerController1 : MonoBehaviour
         speed = dashSpeed; // 대쉬 속도 적용
     }
 
+    // 충돌 감지
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDashing && collision.gameObject.CompareTag("Player"))
+        {
+            Debug.Log("Stun!!");
+
+           
+        }
+    }
+
     public void StunPlayer(float duration)
     {
         Stun = true;

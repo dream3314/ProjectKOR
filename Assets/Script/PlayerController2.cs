@@ -9,22 +9,31 @@ public class PlayerController2 : MonoBehaviour
     public Animator animator;
     public bool Stun = false;
 
-    private float speed = 5f;
-    private float JumpingPower = 16f;
     private bool IsFaceRight = true;
     private Camera mainCamera;
     private Vector2 screenBounds;
     private float objectWidth;
     private bool isDashing = false;
-    private float dashSpeed = 10f;
     private float dashDuration = 0.2f; // 대쉬 지속 시간 (초)
     private float dashTimer = 0f;
     private float dashDirection = 1f; // 대쉬 방향
     private float stunDuration = 5f; // Stun 지속 시간 (초)
     private float stunTimer = 0f;
+    private SwordController swordController;
 
+    [SerializeField] private float dashSpeed = 10f;
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float JumpingPower = 16f;
     [SerializeField] private Transform GroundTouch;
     [SerializeField] private LayerMask GroundLayer;
+
+    // 대시 충전 관련 변수 추가
+    private bool isChargingDash = false;
+    private float dashChargeTime = 0f;
+    private float maxDashChargeTime = 2f;
+    private float[] dashSpeedLevels = { 10f, 15f }; // 단계별 대시 속도
+    private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
+    private float chargeMoveSpeed = 2f; // 충전 중 이동 속도
 
     void Start()
     {
@@ -147,6 +156,16 @@ public class PlayerController2 : MonoBehaviour
         dashTimer = dashDuration;
         dashDirection = Horizontal > 0f ? 1f : -1f; // 대쉬 방향 결정
         speed = dashSpeed; // 대쉬 속도 적용
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDashing && collision.gameObject.CompareTag("Player"))
+        {
+            Debug.Log("Stun!!");
+
+
+        }
     }
 
     public void StunPlayer(float duration)
