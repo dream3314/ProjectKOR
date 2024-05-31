@@ -212,7 +212,7 @@ public class PlayerController1 : MonoBehaviour
         if (isDashing && collision.gameObject.CompareTag("Player"))
         {
             Debug.Log("Stun!!");
-
+            
            
         }
     }

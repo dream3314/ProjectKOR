@@ -1,18 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Stun : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private PlayerController1 player1;
+    private PlayerController2 player2;
 
-    // Update is called once per frame
+    [SerializeField] private int StunHp = 5;
+
+    
+
     void Update()
     {
         
     }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        
+    }
+
+    
 }
