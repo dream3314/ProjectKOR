@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController1 : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public Rigidbody2D rb;
     public BoxCollider2D boxCollider2D;
@@ -19,6 +19,7 @@ public class PlayerController1 : MonoBehaviour
     private float dashDirection = 1f; // 대쉬 방향
     private float stunDuration = 5f; // Stun 지속 시간 (초)
     private float stunTimer = 0f;
+    private int currentStunHealth;
     private SwordController swordController;
 
     [SerializeField] private float dashSpeed = 10f;
@@ -26,6 +27,7 @@ public class PlayerController1 : MonoBehaviour
     [SerializeField] private float JumpingPower = 16f;
     [SerializeField] private Transform GroundTouch;
     [SerializeField] private LayerMask GroundLayer;
+    [SerializeField] private int stunHealth = 5; // 스턴 체력
 
     // 대시 충전 관련 변수 추가
     private bool isChargingDash = false;
@@ -34,6 +36,7 @@ public class PlayerController1 : MonoBehaviour
     private float[] dashSpeedLevels = { 10f, 15f }; // 단계별 대시 속도
     private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
     private float chargeMoveSpeed = 2f; // 충전 중 이동 속도
+
 
     void Start()
     {
@@ -44,6 +47,8 @@ public class PlayerController1 : MonoBehaviour
         screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, mainCamera.transform.position.z));
         objectWidth = GetComponent<SpriteRenderer>().bounds.extents.x;
         swordController = GetComponent<SwordController>();
+
+        currentStunHealth = stunHealth;
     }
 
     void Update()
@@ -206,27 +211,46 @@ public class PlayerController1 : MonoBehaviour
         speed = dashSpeed; // 대쉬 속도 적용
     }
 
-    // 충돌 감지
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (isDashing && collision.gameObject.CompareTag("Player"))
-        {
-            Debug.Log("Stun!!");
-            
-           
-        }
-    }
-
     public void StunPlayer(float duration)
     {
         Stun = true;
         stunTimer = duration;
         rb.velocity = Vector2.zero; // 스턴 상태일 때 움직임 멈춤
+
+        // 스턴 애니메이션 트리거
+        animator.SetTrigger("Stun");
     }
 
     // 기본 Stun 지속 시간을 사용하는 메서드 추가
     public void StunPlayer()
     {
         StunPlayer(stunDuration);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDashing && collision.gameObject.CompareTag("Player"))
+        {
+            Debug.Log("Stun!!");
+
+            PlayerController otherPlayer = collision.gameObject.GetComponent<PlayerController>();
+            if (otherPlayer != null)
+            {
+                ApplyStunDamage(otherPlayer, 1); // 대쉬할 때 1 데미지를 줌
+            }
+
+            StunPlayer();
+        }
+    }
+
+    public void ApplyStunDamage(PlayerController otherPlayer, int damage)
+    {
+        otherPlayer.currentStunHealth -= damage;
+        Debug.Log("Stun health left: " + otherPlayer.currentStunHealth);
+        if (otherPlayer.currentStunHealth <= 0)
+        {
+            otherPlayer.StunPlayer();
+            otherPlayer.currentStunHealth = stunHealth; // Reset stun health if needed
+        }
     }
 }
