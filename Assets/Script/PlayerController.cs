@@ -47,7 +47,6 @@ public class PlayerController : MonoBehaviour
         screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, mainCamera.transform.position.z));
         objectWidth = GetComponent<SpriteRenderer>().bounds.extents.x;
         swordController = GetComponent<SwordController>();
-
         currentStunHealth = stunHealth;
     }
 
@@ -231,15 +230,13 @@ public class PlayerController : MonoBehaviour
     {
         if (isDashing && collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Stun!!");
-
             PlayerController otherPlayer = collision.gameObject.GetComponent<PlayerController>();
-            if (otherPlayer != null)
+            if (otherPlayer != null && !otherPlayer.isDashing) // 다른 플레이어가 대쉬 중이 아닌 경우에만 스턴 데미지를 줌
             {
                 ApplyStunDamage(otherPlayer, 1); // 대쉬할 때 1 데미지를 줌
             }
 
-            StunPlayer();
+            // 대쉬한 플레이어는 스턴 데미지를 받지 않음
         }
     }
 
