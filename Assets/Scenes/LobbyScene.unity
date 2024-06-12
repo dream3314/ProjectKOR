@@ -182,8 +182,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Game Start
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
-  m_sharedMaterial: {fileID: -2487693931377970807, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 53aba41776375c244aaba825926b3d36, type: 2}
+  m_sharedMaterial: {fileID: -3892304157265894916, guid: 53aba41776375c244aaba825926b3d36, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -316,8 +316,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: The Knight On the Round
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
-  m_sharedMaterial: {fileID: -2487693931377970807, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 53aba41776375c244aaba825926b3d36, type: 2}
+  m_sharedMaterial: {fileID: -3892304157265894916, guid: 53aba41776375c244aaba825926b3d36, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -623,8 +623,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\uB9C8\uC2A4\uD130 \uC11C\uBC84 \uC5F0\uACB0\uC911..."
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
-  m_sharedMaterial: {fileID: -2487693931377970807, guid: 5893327cd9739e545b6d81cad9550f4d, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 53aba41776375c244aaba825926b3d36, type: 2}
+  m_sharedMaterial: {fileID: -3892304157265894916, guid: 53aba41776375c244aaba825926b3d36, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
