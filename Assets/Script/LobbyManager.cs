@@ -74,7 +74,6 @@ public class LobbyMain : MonoBehaviourPunCallbacks
             ReconnectToMasterServer();
             //마스터서버에 접속
         }
-
     }
 
     private void ReconnectToMasterServer()
@@ -110,5 +109,6 @@ public class LobbyMain : MonoBehaviourPunCallbacks
     {
         //룸 참가에 성공하는 경우 호출되는 콜백
         UpdateStatusText("방에 입장했습니다.");
+        PhotonNetwork.LoadLevel("SampleScene");
     }
 }

@@ -1,12 +1,12 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviourPun
 {
     public Rigidbody2D rb;
     public BoxCollider2D boxCollider2D;
-    public Animator animator;
     public bool Stun = false;
 
     private bool IsFaceRight = true;
@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private int currentStunHealth;
     private SwordController swordController;
 
+    [SerializeField] private Animator animator;
     [SerializeField] private float dashSpeed = 10f;
     [SerializeField] private float speed = 5f;
     [SerializeField] private float JumpingPower = 16f;
@@ -59,14 +60,17 @@ public class PlayerController : MonoBehaviour
             if (Input.GetKey(KeyCode.LeftArrow))
             {
                 Horizontal = -1f;
+                animator.SetBool("IsRun", true);
             }
             else if (Input.GetKey(KeyCode.RightArrow))
             {
                 Horizontal = 1f;
+                animator.SetBool("IsRun", true);
             }
-
-            animator.SetFloat("Run", Mathf.Abs(Horizontal));
-            animator.SetBool("Jump", !IsGround());
+            else
+            {
+                animator.SetBool("IsRun", false);
+            }
 
             // X 키를 눌렀을 때 점프
             if (Input.GetKeyDown(KeyCode.X) && IsGround())
