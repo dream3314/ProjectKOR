@@ -4,13 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using TMPro;
-using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LobbyMain : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private string gameVersion;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private Button joinButton;
 
@@ -22,7 +20,6 @@ public class LobbyMain : MonoBehaviourPunCallbacks
         });
 
         //마스터 서버 접속
-        PhotonNetwork.GameVersion = gameVersion;
         PhotonNetwork.ConnectUsingSettings(); //마스터 서버 접속 시도
         joinButton.interactable = false;  //버튼의 인터렉션을 비활성화
 

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviourPun
+public class PlayerController : MonoBehaviourPun, IPunObservable
 {
     public Rigidbody2D rb;
     public BoxCollider2D boxCollider2D;
@@ -37,7 +37,18 @@ public class PlayerController : MonoBehaviourPun
     private float[] dashSpeedLevels = { 10f, 15f }; // 단계별 대시 속도
     private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
     private float chargeMoveSpeed = 2f; // 충전 중 이동 속도
+    private PlayerType playerType;
 
+    public enum PlayerType
+    {
+        None = -1,
+        Player1, Player2
+    }
+
+    public void Init(PlayerType playerType)
+    {
+        this.playerType = playerType;
+    }
 
     void Start()
     {
@@ -53,16 +64,21 @@ public class PlayerController : MonoBehaviourPun
 
     void Update()
     {
+        if (!photonView.IsMine) return; // 로컬 플레이어가 아닐 경우 입력을 받지 않음
+
         if (!Stun)
         {
             float Horizontal = 0f;
 
-            if (Input.GetKey(KeyCode.LeftArrow))
+            int dirX = (int)Input.GetAxisRaw("Horizontal");
+            var dir = new Vector2(dirX, 0);
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 Horizontal = -1f;
                 animator.SetBool("IsRun", true);
             }
-            else if (Input.GetKey(KeyCode.RightArrow))
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
                 Horizontal = 1f;
                 animator.SetBool("IsRun", true);
@@ -116,8 +132,10 @@ public class PlayerController : MonoBehaviourPun
         }
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
+        if (!photonView.IsMine) return; // 로컬 플레이어가 아닐 경우 입력을 받지 않음
+
         if (isDashing)
         {
             // 대쉬 중인 경우
@@ -212,6 +230,18 @@ public class PlayerController : MonoBehaviourPun
         dashTimer = dashDuration;
         dashDirection = IsFaceRight ? 1f : -1f; // 현재 바라보는 방향으로 대쉬
         speed = dashSpeed; // 대쉬 속도 적용
+
+        photonView.RPC("SyncDash", RpcTarget.Others, dashSpeed, dashDuration, dashDirection); // 대시 시작 동기화
+    }
+
+    [PunRPC]
+    private void SyncDash(float dashSpeed, float dashDuration, float dashDirection)
+    {
+        this.dashSpeed = dashSpeed;
+        this.dashDuration = dashDuration;
+        this.dashDirection = dashDirection;
+        isDashing = true;
+        dashTimer = dashDuration;
     }
 
     public void StunPlayer(float duration)
@@ -252,6 +282,27 @@ public class PlayerController : MonoBehaviourPun
         {
             otherPlayer.StunPlayer();
             otherPlayer.currentStunHealth = stunHealth; // Reset stun health if needed
+        }
+    }
+
+    // 위치 및 애니메이션 동기화를 위한 IPunObservable 인터페이스 구현
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            // 로컬 플레이어의 데이터를 스트림에 씀
+            stream.SendNext(rb.position);
+            stream.SendNext(rb.velocity);
+            stream.SendNext(animator.GetBool("IsRun"));
+            stream.SendNext(animator.GetBool("IsJump"));
+        }
+        else
+        {
+            // 원격 플레이어의 데이터를 스트림에서 읽음
+            rb.position = (Vector2)stream.ReceiveNext();
+            rb.velocity = (Vector2)stream.ReceiveNext();
+            animator.SetBool("IsRun", (bool)stream.ReceiveNext());
+            animator.SetBool("IsJump", (bool)stream.ReceiveNext());
         }
     }
 }

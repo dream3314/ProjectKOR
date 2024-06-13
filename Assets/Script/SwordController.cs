@@ -1,8 +1,9 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SwordController : MonoBehaviour
+public class SwordController : MonoBehaviourPun
 {
     public float zoomInSize = 3f;
     public float zoomOutSize = 5f;
