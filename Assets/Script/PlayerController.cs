@@ -14,10 +14,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     private Vector2 screenBounds;
     private float objectWidth;
     private bool isDashing = false;
-    private float dashDuration = 0.2f; // 대쉬 지속 시간 (초)
     private float dashTimer = 0f;
-    private float dashDirection = 1f; // 대쉬 방향
-    private float stunDuration = 5f; // Stun 지속 시간 (초)
+    private float dashDirection = 1f;
     private float stunTimer = 0f;
     private int currentStunHealth;
     private SwordController swordController;
@@ -28,15 +26,16 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     [SerializeField] private float JumpingPower = 16f;
     [SerializeField] private Transform GroundTouch;
     [SerializeField] private LayerMask GroundLayer;
-    [SerializeField] private int stunHealth = 5; // 스턴 체력
+    [SerializeField] private int stunHealth = 5;
+    [SerializeField] private float dashDuration = 0.2f;
+    [SerializeField] private float stunDuration = 5f;
 
-    // 대시 충전 관련 변수 추가
     private bool isChargingDash = false;
     private float dashChargeTime = 0f;
     private float maxDashChargeTime = 2f;
-    private float[] dashSpeedLevels = { 10f, 15f }; // 단계별 대시 속도
-    private float[] dashDurationLevels = { 0.2f, 0.4f }; // 단계별 대시 지속 시간
-    private float chargeMoveSpeed = 2f; // 충전 중 이동 속도
+    private float[] dashSpeedLevels = { 10f, 15f };
+    private float[] dashDurationLevels = { 0.2f, 0.4f };
+    private float chargeMoveSpeed = 2f;
     private PlayerType playerType;
 
     public enum PlayerType
@@ -64,115 +63,109 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     void Update()
     {
-        if (!photonView.IsMine) return; // 로컬 플레이어가 아닐 경우 입력을 받지 않음
+        if (!photonView.IsMine) return;
 
-        if (!Stun)
-        {
-            float Horizontal = 0f;
-
-            int dirX = (int)Input.GetAxisRaw("Horizontal");
-            var dir = new Vector2(dirX, 0);
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                Horizontal = -1f;
-                animator.SetBool("IsRun", true);
-            }
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                Horizontal = 1f;
-                animator.SetBool("IsRun", true);
-            }
-            else
-            {
-                animator.SetBool("IsRun", false);
-            }
-
-            // X 키를 눌렀을 때 점프
-            if (Input.GetKeyDown(KeyCode.X) && IsGround())
-            {
-                rb.velocity = new Vector2(rb.velocity.x, JumpingPower);
-            }
-            if (Input.GetKeyUp(KeyCode.X) && rb.velocity.y > 0f)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
-            }
-
-            // 대시 충전 시작
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                StartDashCharge();
-            }
-
-            // 대시 충전 중
-            if (Input.GetKey(KeyCode.Z))
-            {
-                ChargeDash();
-                // 충전 중일 때 플레이어 이동
-                rb.velocity = new Vector2(Horizontal * chargeMoveSpeed, rb.velocity.y);
-            }
-
-            // 대시 시작
-            if (Input.GetKeyUp(KeyCode.Z))
-            {
-                ExecuteDash();
-            }
-
-            Flip(Horizontal);
-        }
-
-        // Stun 상태 시간 경과 체크
         if (Stun)
         {
-            stunTimer -= Time.deltaTime;
-            if (stunTimer <= 0f)
-            {
-                Stun = false;
-            }
+            HandleStun();
+        }
+        else
+        {
+            HandleMovement();
+            HandleJump();
+            HandleDash();
+            Flip();
         }
     }
 
     void FixedUpdate()
     {
-        if (!photonView.IsMine) return; // 로컬 플레이어가 아닐 경우 입력을 받지 않음
+        if (!photonView.IsMine) return;
 
         if (isDashing)
         {
-            // 대쉬 중인 경우
-            rb.velocity = new Vector2(dashDirection * dashSpeed, rb.velocity.y);
-
-            // 대쉬 시간이 지나면 대쉬 종료
-            dashTimer -= Time.fixedDeltaTime;
-            if (dashTimer <= 0f)
-            {
-                isDashing = false;
-                speed = 5f; // 대쉬가 종료되면 다시 기본 속도로 돌아감
-            }
+            PerformDash();
         }
         else if (!Stun && !isChargingDash)
         {
-            float Horizontal = 0f;
+            MovePlayer();
+            WrapAroundScreen();
+        }
+    }
 
-            if (Input.GetKey(KeyCode.LeftArrow))
-            {
-                Horizontal = -1f;
-            }
-            else if (Input.GetKey(KeyCode.RightArrow))
-            {
-                Horizontal = 1f;
-            }
+    private void HandleMovement()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        animator.SetBool("IsRun", horizontal != 0);
+        if (!isChargingDash)
+        {
+            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+        }
+    }
 
-            rb.velocity = new Vector2(Horizontal * speed, rb.velocity.y);
+    private void HandleJump()
+    {
+        if (Input.GetKeyDown(KeyCode.X) && IsGround())
+        {
+            rb.velocity = new Vector2(rb.velocity.x, JumpingPower);
+        }
+        if (Input.GetKeyUp(KeyCode.X) && rb.velocity.y > 0f)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+        }
+    }
 
-            // 화면을 벗어나면 반대편으로 이동
-            if (transform.position.x < screenBounds.x * -1 - objectWidth)
-            {
-                transform.position += new Vector3(screenBounds.x * 2, 0f, 0f);
-            }
-            else if (transform.position.x > screenBounds.x + objectWidth)
-            {
-                transform.position += new Vector3(-screenBounds.x * 2, 0f, 0f);
-            }
+    private void HandleDash()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            StartDashCharge();
+        }
+        if (Input.GetKey(KeyCode.Z))
+        {
+            ChargeDash();
+            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * chargeMoveSpeed, rb.velocity.y);
+        }
+        if (Input.GetKeyUp(KeyCode.Z))
+        {
+            ExecuteDash();
+        }
+    }
+
+    private void HandleStun()
+    {
+        stunTimer -= Time.deltaTime;
+        if (stunTimer <= 0f)
+        {
+            Stun = false;
+        }
+    }
+
+    private void MovePlayer()
+    {
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+    }
+
+    private void PerformDash()
+    {
+        rb.velocity = new Vector2(dashDirection * dashSpeed, rb.velocity.y);
+        dashTimer -= Time.fixedDeltaTime;
+        if (dashTimer <= 0f)
+        {
+            isDashing = false;
+        }
+    }
+
+    private void WrapAroundScreen()
+    {
+        if (transform.position.x < screenBounds.x * -1 - objectWidth)
+        {
+            transform.position += new Vector3(screenBounds.x * 2, 0f, 0f);
+        }
+        else if (transform.position.x > screenBounds.x + objectWidth)
+        {
+            transform.position += new Vector3(-screenBounds.x * 2, 0f, 0f);
         }
     }
 
@@ -181,9 +174,10 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         return Physics2D.OverlapCircle(GroundTouch.position, 0.2f, GroundLayer);
     }
 
-    private void Flip(float Horizontal)
+    private void Flip()
     {
-        if (IsFaceRight && Horizontal < 0f || !IsFaceRight && Horizontal > 0f)
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        if (IsFaceRight && horizontal < 0f || !IsFaceRight && horizontal > 0f)
         {
             IsFaceRight = !IsFaceRight;
             Vector3 localScale = transform.localScale;
@@ -200,14 +194,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
 
     private void ChargeDash()
     {
-        if (isChargingDash)
-        {
-            dashChargeTime += Time.deltaTime;
-            if (dashChargeTime > maxDashChargeTime)
-            {
-                dashChargeTime = maxDashChargeTime;
-            }
-        }
+        dashChargeTime += Time.deltaTime;
+        dashChargeTime = Mathf.Min(dashChargeTime, maxDashChargeTime);
     }
 
     private void ExecuteDash()
@@ -215,23 +203,15 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         isChargingDash = false;
         isDashing = true;
 
-        // 충전된 시간에 따라 대시 속도와 지속 시간 결정
-        if (dashChargeTime < 1f)
-        {
-            dashSpeed = dashSpeedLevels[0];
-            dashDuration = dashDurationLevels[0];
-        }
-        else
-        {
-            dashSpeed = dashSpeedLevels[1];
-            dashDuration = dashDurationLevels[1];
-        }
+        int level = dashChargeTime < 1f ? 0 : 1;
+        dashSpeed = dashSpeedLevels[level];
+        dashDuration = dashDurationLevels[level];
 
         dashTimer = dashDuration;
-        dashDirection = IsFaceRight ? 1f : -1f; // 현재 바라보는 방향으로 대쉬
-        speed = dashSpeed; // 대쉬 속도 적용
+        dashDirection = IsFaceRight ? 1f : -1f;
+        speed = dashSpeed;
 
-        photonView.RPC("SyncDash", RpcTarget.Others, dashSpeed, dashDuration, dashDirection); // 대시 시작 동기화
+        photonView.RPC("SyncDash", RpcTarget.Others, dashSpeed, dashDuration, dashDirection);
     }
 
     [PunRPC]
@@ -248,13 +228,10 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
     {
         Stun = true;
         stunTimer = duration;
-        rb.velocity = Vector2.zero; // 스턴 상태일 때 움직임 멈춤
-
-        // 스턴 애니메이션 트리거
+        rb.velocity = Vector2.zero;
         animator.SetTrigger("Stun");
     }
 
-    // 기본 Stun 지속 시간을 사용하는 메서드 추가
     public void StunPlayer()
     {
         StunPlayer(stunDuration);
@@ -265,32 +242,27 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         if (isDashing && collision.gameObject.CompareTag("Player"))
         {
             PlayerController otherPlayer = collision.gameObject.GetComponent<PlayerController>();
-            if (otherPlayer != null && !otherPlayer.isDashing) // 다른 플레이어가 대쉬 중이 아닌 경우에만 스턴 데미지를 줌
+            if (otherPlayer != null && !otherPlayer.isDashing)
             {
-                ApplyStunDamage(otherPlayer, 1); // 대쉬할 때 1 데미지를 줌
+                ApplyStunDamage(otherPlayer, 1);
             }
-
-            // 대쉬한 플레이어는 스턴 데미지를 받지 않음
         }
     }
 
     public void ApplyStunDamage(PlayerController otherPlayer, int damage)
     {
         otherPlayer.currentStunHealth -= damage;
-        Debug.Log("Stun health left: " + otherPlayer.currentStunHealth);
         if (otherPlayer.currentStunHealth <= 0)
         {
             otherPlayer.StunPlayer();
-            otherPlayer.currentStunHealth = stunHealth; // Reset stun health if needed
+            otherPlayer.currentStunHealth = stunHealth;
         }
     }
 
-    // 위치 및 애니메이션 동기화를 위한 IPunObservable 인터페이스 구현
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
-            // 로컬 플레이어의 데이터를 스트림에 씀
             stream.SendNext(rb.position);
             stream.SendNext(rb.velocity);
             stream.SendNext(animator.GetBool("IsRun"));
@@ -298,7 +270,6 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         }
         else
         {
-            // 원격 플레이어의 데이터를 스트림에서 읽음
             rb.position = (Vector2)stream.ReceiveNext();
             rb.velocity = (Vector2)stream.ReceiveNext();
             animator.SetBool("IsRun", (bool)stream.ReceiveNext());

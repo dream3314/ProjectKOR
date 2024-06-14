@@ -940,7 +940,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61f8a1ccccf93aa47b2f67a5e9c72847, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: 1
   statusText: {fileID: 1019826503}
   joinButton: {fileID: 1079828196}
 --- !u!4 &1140691402
