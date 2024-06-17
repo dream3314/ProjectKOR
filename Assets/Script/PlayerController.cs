@@ -153,7 +153,8 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
         dashTimer -= Time.fixedDeltaTime;
         if (dashTimer <= 0f)
         {
-            isDashing = false;
+            isDashing = false; // 대쉬 상태가 끝났을 때 isDashing 초기화
+            speed = 5f; // 대쉬 후 기본 속도로 리셋
         }
     }
 
@@ -245,6 +246,10 @@ public class PlayerController : MonoBehaviourPun, IPunObservable
             if (otherPlayer != null && !otherPlayer.isDashing)
             {
                 ApplyStunDamage(otherPlayer, 1);
+                isDashing = false; // 다른 플레이어와 충돌 시 대쉬 상태 초기화
+                speed = 5f; // 충돌 후 기본 속도로 리셋
+
+                Debug.Log("Player1이 Player2와 충돌했습니다."); // 로그 출력
             }
         }
     }

@@ -210,6 +210,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   stunHealth: 5
+  dashDuration: 0.2
+  stunDuration: 5
 --- !u!114 &1743456822171912762
 MonoBehaviour:
   m_ObjectHideFlags: 0
