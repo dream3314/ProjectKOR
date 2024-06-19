@@ -77,7 +77,7 @@ GameObject:
   - component: {fileID: 8604429792772286685}
   - component: {fileID: 7863724823157035842}
   - component: {fileID: 2954011270949988443}
-  - component: {fileID: 8230833222348746354}
+  - component: {fileID: 5553768546527960895}
   - component: {fileID: 2970206490391729628}
   m_Layer: 0
   m_Name: Player2
@@ -272,6 +272,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   stunHealth: 5
+  dashDuration: 0.2
+  stunDuration: 5
 --- !u!114 &2954011270949988443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,12 +293,13 @@ MonoBehaviour:
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 8230833222348746354}
+  - {fileID: 7863724823157035842}
+  - {fileID: 5553768546527960895}
   - {fileID: 2970206490391729628}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &8230833222348746354
+--- !u!114 &5553768546527960895
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -305,13 +308,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 8963002275022403823}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 1
-  m_UseLocal: 1
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 2
+    InterpolateMoveTowardsSpeed: -3
+    InterpolateLerpSpeed: 1
+    ExtrapolateOption: 2
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 1
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!114 &2970206490391729628
 MonoBehaviour:
   m_ObjectHideFlags: 0

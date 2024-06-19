@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 9212630069710938752}
   - component: {fileID: 7749996906176569585}
   - component: {fileID: 1743456822171912762}
-  - component: {fileID: 7614978538710439288}
+  - component: {fileID: -5308023573458436997}
   - component: {fileID: 1637751216173410042}
   m_Layer: 0
   m_Name: Player1
@@ -201,7 +201,7 @@ MonoBehaviour:
   rb: {fileID: 9212630069710938752}
   boxCollider2D: {fileID: 3460864956181318269}
   Stun: 0
-  animator: {fileID: 0}
+  animator: {fileID: 3905219804604466697}
   dashSpeed: 8
   speed: 5
   JumpingPower: 16
@@ -229,14 +229,15 @@ MonoBehaviour:
   prefixField: -1
   Synchronization: 3
   OwnershipTransfer: 0
-  observableSearch: 0
+  observableSearch: 2
   ObservedComponents:
-  - {fileID: 7614978538710439288}
+  - {fileID: 7749996906176569585}
+  - {fileID: -5308023573458436997}
   - {fileID: 1637751216173410042}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &7614978538710439288
+--- !u!114 &-5308023573458436997
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -245,13 +246,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 3714459018173966890}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Script: {fileID: 11500000, guid: 8efc6b1d64977384eb3405357896c656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 1
-  m_UseLocal: 1
+  m_PositionModel:
+    SynchronizeEnabled: 1
+    TeleportEnabled: 1
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 2
+    InterpolateMoveTowardsSpeed: -3
+    InterpolateLerpSpeed: 1
+    ExtrapolateOption: 2
+    ExtrapolateSpeed: 1
+    ExtrapolateIncludingRoundTripTime: 1
+    ExtrapolateNumberOfStoredPositions: 1
+  m_RotationModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 1
+    InterpolateRotateTowardsSpeed: 180
+    InterpolateLerpSpeed: 5
+  m_ScaleModel:
+    SynchronizeEnabled: 1
+    InterpolateOption: 0
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 0
 --- !u!114 &1637751216173410042
 MonoBehaviour:
   m_ObjectHideFlags: 0
